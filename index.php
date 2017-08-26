@@ -25,6 +25,20 @@ $task_list = [["Задача" => "Собеседование в IT компан�
               ["Задача" => "Встреча с другом", "Дата выполнения" => "22.04.2018", "Категория" => "Входящие", "Выполнен" => false],
               ["Задача" => "Купить корм для кота", "Дата выполнения" => "-", "Категория" => "Домашние дела", "Выполнен" => false],
               ["Задача" => "Заказать пиццу", "Дата выполнения" => "-", "Категория" => "Домашние дела", "Выполнен" => false]];
+
+$task_counter = function($task_list, $project_name = "Все"){
+
+    $counter = 0;
+
+    foreach ($task_list as $key => $value) {
+        if($value["Категория"] == $project_name || $project_name == "Все"){
+            ++$counter;
+        }
+    }
+
+    return $counter;
+}    
+
 ?>
 
 
@@ -85,14 +99,14 @@ $task_list = [["Задача" => "Собеседование в IT компан�
 
                                     <li class="main-navigation__list-item main-navigation__list-item--active">
                                         <a class="main-navigation__list-item-link" href="#"><? echo $projects[$index] ?></a>
-                                        <span class="main-navigation__list-item-count"><?php echo rand(0,24) ?></span>
+                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($task_list, $projects[$index]); ?></span>
                                     </li>
 
                                 <?php else: ?>
 
                                     <li class="main-navigation__list-item">
                                         <a class="main-navigation__list-item-link" href="#"><? echo $projects[$index] ?></a>
-                                        <span class="main-navigation__list-item-count"><?php echo rand(0,24) ?></span>
+                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($task_list, $projects[$index]); ?></span>
                                     </li>
 
                                 <?php endif ?>    
