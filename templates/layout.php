@@ -48,7 +48,7 @@ $task_counter = function($task_list, $project_name = "Все"){
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body><!--class="overlay"-->
+<body class="<?php isset($_GET['add']) ? print('overlay') : print('') ?>"><!--class="overlay"-->
     <h1 class="visually-hidden">Дела в порядке</h1>
 
     <div class="page-wrapper">
@@ -59,7 +59,7 @@ $task_counter = function($task_list, $project_name = "Все"){
                 </a>
 
                 <div class="main-header__side">
-                    <a class="main-header__side-item button button--plus" href="#">Добавить задачу</a>
+                    <a class="main-header__side-item button button--plus" href="index.php?add">Добавить задачу</a>
 
                     <div class="main-header__side-item user-menu">
                         <div class="user-menu__image">
@@ -94,14 +94,14 @@ $task_counter = function($task_list, $project_name = "Все"){
                                 <?php if($index == 0) :?>
 
                                     <li class="main-navigation__list-item main-navigation__list-item--active">
-                                        <a class="main-navigation__list-item-link" href="#"><? echo $projects[$index] ?></a>
+                                        <a class="main-navigation__list-item-link" href="index.php"><? echo $projects[$index] ?></a>
                                         <span class="main-navigation__list-item-count"><?php echo $task_counter($task_list, $projects[$index]); ?></span>
                                     </li>
 
                                 <?php else: ?>
 
                                     <li class="main-navigation__list-item">
-                                        <a class="main-navigation__list-item-link" href="#"><? echo $projects[$index] ?></a>
+                                        <a class="main-navigation__list-item-link" href="index.php?project=<?php print($index) ?>"><? echo $projects[$index] ?></a>
                                         <span class="main-navigation__list-item-count"><?php echo $task_counter($task_list, $projects[$index]); ?></span>
                                     </li>
 
