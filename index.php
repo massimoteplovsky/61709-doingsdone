@@ -1,4 +1,5 @@
 <?php 
+session_start();
 error_reporting(E_ALL);
 require_once "functions.php";
 
@@ -14,34 +15,39 @@ $task_list = [["Задача" => "Собеседование в IT компан�
 ["Задача" => "Купить корм для кота", "Дата выполнения" => "-", "Категория" => "Домашние дела", "Выполнен" => false],
 ["Задача" => "Заказать пиццу", "Дата выполнения" => "-", "Категория" => "Домашние дела", "Выполнен" => false]]; 
 
-$required = ['name', 'project', 'date'];
-$errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    $required = ['name', 'project', 'date'];
+    $errors = [];
+    $_SESSION['fields'] = $_POST;
 
     foreach ($_POST as $key => $value) {
 
         if (in_array($key, $required) && $value == '') {
             $errors[] = $key;
-            break;
         }
 
     }
 
     if(count($errors)){
 
-        print(renderTemplate('templates/add-task-form.php', ["errors" => $errors]));
-        
+        $_SESSION['errors'] = $errors;
+        header("Location:index.php?add");
+
+    } else {
+        $_SESSION['errors'] = [];
+        header("Location:index.php");
     }
-}   
+}
 
 if(isset($_GET['add'])){
 
-    $taskForm = renderTemplate('templates/add-task-form.php', ["errors" => $errors]);
+    $taskForm = renderTemplate('templates/add-task-form.php', ["projects" => $projects]);
 
     print($taskForm);
 
-} 
+}
 
 if(isset($_GET['project'])){
 
@@ -49,7 +55,7 @@ if(isset($_GET['project'])){
 
     if($number){
 
-        if(!isset($projects[$number])){
+        if(!isset($projects[$number])) {
             http_response_code(404);
         }
 
