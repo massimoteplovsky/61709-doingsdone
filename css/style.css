@@ -756,6 +756,13 @@ a:focus {
   color: #f84646;
 }
 
+.form__error{
+  display: block;
+  margin-bottom: 5px;
+  color: #f84646;
+  font-size: 11px;
+}
+
 .error-massage {
   color: #f84646;
 }

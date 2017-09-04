@@ -8,8 +8,6 @@ $project = $fields['project'] ?? '';
 $date = $fields['date'] ?? '';
 $errors = $_SESSION['errors'];
 
-print_r($project);
-
 function checkErrors($errors_arr, $field){
   foreach ($errors_arr as $value) {
     if ($value == $field) {
@@ -25,7 +23,7 @@ function checkErrors($errors_arr, $field){
 
   <h2 class="modal__heading">Добавление задачи</h2>
 
-  <form class="form" action="index.php" method="post">
+  <form class="form" action="index.php" method="post" enctype="multipart/form-data">
     <div class="form__row">
       <label class="form__label" for="name">Название <sup>*</sup></label>
       <?php checkErrors($errors, "name") ? print("<span class='form__error'>Введите название задачи</span>") : print(""); ?>

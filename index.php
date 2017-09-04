@@ -18,8 +18,29 @@ $task_list = [["Задача" => "Собеседование в IT компан�
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
+    if(isset($_FILES["preview"]) && $_FILES["preview"]["name"]){
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $file_name = $_FILES["preview"]['name'];
+        $file_tmp_name = $_FILES["preview"]['tmp_name'];
+        $file_size = $_FILES["preview"]['size'];
+        $file_path = __DIR__ . '/uploads/';
+        $file_type = $_FILES["preview"]['type'];
+
+        if (($file_type !== 'image/gif' && $file_type !== 'image/png' && $file_type !== 'image/jpg') || ($file_size > 102400)) {
+            print("Загрузите картинку в формате gif, png, jpg. Размер файла не должен быть более 100мб");
+            exit();
+        }
+
+        if(is_uploaded_file($file_tmp_name)){
+            move_uploaded_file($file_tmp_name, $file_path . $file_name);
+        }
+    
+    }
+
     $required = ['name', 'project', 'date'];
     $errors = [];
+    
     $_SESSION['fields'] = $_POST;
 
     foreach ($_POST as $key => $value) {
@@ -37,9 +58,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     } else {
         $_SESSION['errors'] = [];
-        header("Location:index.php");
+        $subarray = [
+        "Задача" => $_SESSION['fields']['name'],
+        "Дата выполнения" => $_SESSION['fields']['date'],
+        "Категория" => $_SESSION['fields']['project'],
+        "Выполнен" => false
+        ];
+
+        array_unshift($task_list, $subarray);
     }
 }
+
+
 
 if(isset($_GET['add'])){
 
