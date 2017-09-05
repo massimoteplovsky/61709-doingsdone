@@ -49,7 +49,7 @@
 
             <td class="task__date" >
                 <!--выведите здесь дату выполнения задачи-->
-                <?php print(htmlspecialchars($value["Дата выполнения"]));  ?>
+                <?php print(htmlspecialchars($value["Дата выполнения"])); ?>
             </td>
 
             <td class="task__controls">
@@ -65,7 +65,7 @@
                     </li>
                 </ul>
             </td>
-        </tr>
+        </tr>      
     <?php endforeach; ?>
     <!--показывать следующий тег <tr/>, если переменная равна единице-->
     <!-- <?php if($show_complete_tasks == 1) :?>
