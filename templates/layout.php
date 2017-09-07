@@ -13,15 +13,6 @@ $date_deadline = date("d.m.Y", $task_deadline_ts);
 // в эту переменную запишите кол-во дней до даты задачи
 $days_until_deadline = ($task_deadline_ts - $current_ts) / 86400;
 
-$projects = ["Все", "Входящие", "Учеба", "Работа", "Домашние дела", "Авто"];
-
-$task_list = [["Задача" => "Собеседование в IT компании", "Дата выполнения" => "01.06.2018", "Категория" => "Работа", "Выполнен" => false],
-              ["Задача" => "Выполнить тестовое задание", "Дата выполнения" => "25.05.2018", "Категория" => "Работа", "Выполнен" => false],
-              ["Задача" => "Сделать задание первого раздела", "Дата выполнения" => "21.04.2018", "Категория" => "Учеба", "Выполнен" => true],
-              ["Задача" => "Встреча с другом", "Дата выполнения" => "22.04.2018", "Категория" => "Входящие", "Выполнен" => false],
-              ["Задача" => "Купить корм для кота", "Дата выполнения" => "-", "Категория" => "Домашние дела", "Выполнен" => false],
-              ["Задача" => "Заказать пиццу", "Дата выполнения" => "-", "Категория" => "Домашние дела", "Выполнен" => false]];
-
 $task_counter = function($task_list, $project_name = "Все"){
 
     $counter = 0;
@@ -48,32 +39,14 @@ $task_counter = function($task_list, $project_name = "Все"){
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="<?php isset($_GET['add']) ? print('overlay') : print('') ?>"><!--class="overlay"-->
+<!--class="overlay"-->
+<body class="<?php isset($_GET['add']) ? print('overlay') : print('') ?>">
     <h1 class="visually-hidden">Дела в порядке</h1>
 
     <div class="page-wrapper">
         <div class="container container--with-sidebar">
-            <header class="main-header">
-                <a href="#">
-                    <img src="img/logo.png" width="153" height="42" alt="Логитип Дела в порядке">
-                </a>
-
-                <div class="main-header__side">
-                    <a class="main-header__side-item button button--plus" href="index.php?add">Добавить задачу</a>
-
-                    <div class="main-header__side-item user-menu">
-                        <div class="user-menu__image">
-                            <img src="img/user-pic.jpg" width="40" height="40" alt="Пользователь">
-                        </div>
-
-                        <div class="user-menu__data">
-                            <p><?php print($templateData["user_name"]); ?></p>
-
-                            <a href="#">Выйти</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            
+           <?php print($templateData["header_content"]); ?>
 
             <div class="content">
                 <section class="content__side">
@@ -84,7 +57,7 @@ $task_counter = function($task_list, $project_name = "Все"){
 
                             <?php 
 
-                            $count = count($projects);
+                            $count = count($templateData["projects"]);
                             $index = 0;
 
                             ?>
@@ -94,15 +67,15 @@ $task_counter = function($task_list, $project_name = "Все"){
                                 <?php if($index == 0) :?>
 
                                     <li class="main-navigation__list-item main-navigation__list-item--active">
-                                        <a class="main-navigation__list-item-link" href="index.php"><? echo $projects[$index] ?></a>
-                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($task_list, $projects[$index]); ?></span>
+                                        <a class="main-navigation__list-item-link" href="index.php"><? echo $templateData["projects"][$index] ?></a>
+                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($templateData["tasks"], $templateData["projects"][$index]); ?></span>
                                     </li>
 
                                 <?php else: ?>
 
                                     <li class="main-navigation__list-item">
-                                        <a class="main-navigation__list-item-link" href="index.php?project=<?php print($index) ?>"><? echo $projects[$index] ?></a>
-                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($task_list, $projects[$index]); ?></span>
+                                        <a class="main-navigation__list-item-link" href="index.php?project=<?php print($index) ?>"><? echo $templateData["projects"][$index] ?></a>
+                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($templateData["tasks"], $templateData["projects"][$index]); ?></span>
                                     </li>
 
                                 <?php endif ?>    
