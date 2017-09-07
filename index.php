@@ -81,13 +81,15 @@ $users = [
 
 
 //Валидация формы добавления задач
+
 if (isset($_POST["task_form"])) {
 
     $required = ['name', 'project', 'date'];
     $errors = [];
-    $_SESSION['fields'] = $_POST;
+    $rules = ['date' => 'validateDate'];
+    $_SESSION['task_form_fields'] = $_POST;
 
-    foreach ($_POST as $key => $value) {
+    foreach ($_SESSION['task_form_fields'] as $key => $value) {
 
         if (in_array($key, $required) && $value == '') {
             $errors[] = $key;
@@ -101,15 +103,17 @@ if (isset($_POST["task_form"])) {
         header("Location:index.php?add");
 
     } else {
-        $_SESSION['errors'] = [];
         $subarray = [
-        "Задача" => $_SESSION['fields']['name'],
-        "Дата выполнения" => $_SESSION['fields']['date'],
-        "Категория" => $_SESSION['fields']['project'],
-        "Выполнен" => false
+            "Задача" => $_SESSION['task_form_fields']['name'],
+            "Дата выполнения" => $_SESSION['task_form_fields']['date'],
+            "Категория" => $_SESSION['task_form_fields']['project'],
+            "Выполнен" => false
         ];
 
         array_unshift($task_list, $subarray);
+
+        $_SESSION['errors'] = [];
+        $_SESSION['task_form_fields'] = [];
     }
 }
 
@@ -118,9 +122,9 @@ if (isset($_POST["login_form"])) {
 
     $required = ['email', 'password'];
     $errors = [];
-    $_SESSION['fields'] = $_POST;
+    $_SESSION['login_form_fields'] = $_POST;
 
-    foreach ($_SESSION['fields'] as $key => $value) {
+    foreach ($_SESSION['login_form_fields'] as $key => $value) {
 
         if (in_array($key, $required) && $value == '') {
             $errors[] = $key;
@@ -147,6 +151,7 @@ if (isset($_POST["login_form"])) {
             if (password_verify($password, $user['password'])) {
 
                 unsetSession(['badpassword']);
+                $_SESSION['login_form_fields'] = [];
                 $_SESSION['user'] = $user;
 
             }else{
@@ -187,7 +192,7 @@ if(isset($_FILES["preview"]['tmp_name']) && $_FILES["preview"]["error"] == UPLOA
 
 //Показ формы добавления задач
 if(isset($_GET['add'])){
-
+   
     $taskForm = renderTemplate('templates/add-task-form.php', ["projects" => $projects]);
 
     print($taskForm);
@@ -221,6 +226,15 @@ if(isset($_GET['project'])){
     $new_arr = $task_list;
 } 
 
+//Показ выполненных задач
+$showCompleted = false;
+if (isset($_GET['show_completed'])) {
+    $showCompleted = sanitizeInput($_GET['show_completed']);
+    setcookie('show_completed', $showCompleted, strtotime("+30 days"));
+} else if (isset($_COOKIE['show_completed'])) {
+    $showCompleted = $_COOKIE['show_completed'];
+}
+
 //Подключение header.php
 $header_content = renderTemplate('templates/header.php', ["user" => $_SESSION['user']]);
 
@@ -233,7 +247,7 @@ if(!$_SESSION['user']){
 } else {
 
     //Подключение главной страницы index.php
-    $page_content = renderTemplate('templates/index.php', ["tasks" => $new_arr, "complete_tasks" => $show_complete_tasks] );
+    $page_content = renderTemplate('templates/index.php', ["tasks" => $new_arr, "complete_tasks" => $showCompleted] );
 
     //Подключение базового шаблона layout.php
     $layout_content = renderTemplate('templates/layout.php', ["header_content" => $header_content, "content" => $page_content, "tasks" => $task_list, "projects" => $projects, "title" => "Дела в порядке!", "user_name" => "Константин"]);

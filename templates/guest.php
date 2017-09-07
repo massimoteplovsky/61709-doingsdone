@@ -2,7 +2,7 @@
 
 <?php 
 
-$fields = $_SESSION['fields'];
+$fields = $_SESSION['login_form_fields'];
 $email = $fields['email'] ?? '';
 $password = $fields['password'] ?? '';
 $errors = $_SESSION['errors'];
@@ -84,7 +84,7 @@ $errors = $_SESSION['errors'];
   </footer>
 
   <div class="modal" <?php isset($_GET['login']) ? print('') : print('hidden') ?>>
-    <button class="modal__close" type="button" name="button">Закрыть</button>
+    <a href="/exit.php" class="modal__close">Закрыть</a>
 
     <h2 class="modal__heading">Вход на сайт</h2>
 
