@@ -31,7 +31,16 @@
 
     <label class="checkbox">
         <!--добавить сюда аттрибут "checked", если переменная $show_complete_tasks равна единице-->
-        <input id="show-complete-tasks" class="checkbox__input visually-hidden" type="checkbox" <?php $templateData["complete_tasks"] ? print("checked") : print("")?>>
+        <?php
+            $checked = '';
+            $hidden = 'hidden';
+
+            if($templateData["complete_tasks"]){
+                $checked = 'checked';
+                $hidden = '';
+            }
+        ?>
+        <input id="show-complete-tasks" class="checkbox__input visually-hidden" type="checkbox" <?php print($checked); ?>>
         <span class="checkbox__text">Показывать выполненные</span>
     </label>
 </div>
@@ -39,7 +48,18 @@
 <table class="tasks">
 
     <?php foreach ($templateData["tasks"] as $key => $value) :?>
-        <tr class="<?php $value['Выполнен'] ? print("tasks__item task task--completed") : print("tasks__item task") ?>">
+
+        <?php
+            $complete_task = '';
+            $show_complete_tasks = '';
+
+            if($value['Выполнен']) {
+                $complete_task = 'task--completed';
+                $show_complete_tasks = $hidden;
+            }
+        ?>
+
+        <tr class="tasks__item task <?php print($complete_task); ?>" <?php print($show_complete_tasks); ?>>
             <td class="task__select">
                 <label class="checkbox task__checkbox">
                     <input class="checkbox__input visually-hidden" type="checkbox">
@@ -67,20 +87,5 @@
             </td>
         </tr>      
     <?php endforeach; ?>
-    <!--показывать следующий тег <tr/>, если переменная равна единице-->
-    <!-- <?php if($templateData["complete_tasks"] == 1) :?>
-        <tr class="tasks__item task task--completed">
-            <td class="task__select">
-                <label class="checkbox task__checkbox">
-                    <input class="checkbox__input visually-hidden" type="checkbox" checked>
-                    <span class="checkbox__text">Записаться на интенсив "Базовый PHP"</span>
-                </label>
-            </td>
-            <td class="task__date">10.04.2017</td>
-
-            <td class="task__controls">
-            </td>
-        </tr>
-    <?php endif ?> -->
 
 </table>
