@@ -9,15 +9,15 @@ CREATE TABLE `tasks` (
 `id` INT AUTO_INCREMENT PRIMARY KEY,
 `user_id` INT NOT NULL,
 `project_id` INT NOT NULL,
-`created` DATETIME NOT NULL,
-`complete` DATETIME DEFAULT NULL,
+`created` TIMESTAMP NOT NULL,
+`complete` TINYINT(1),
 `deadline` DATETIME,
 `name` CHAR(255) NOT NULL,
 `file` CHAR(255)
 );
 CREATE TABLE `user` (
 `id` INT AUTO_INCREMENT PRIMARY KEY,
-`registered` DATETIME NOT NULL,
+`registered` TIMESTAMP NOT NULL,
 `email`CHAR(155) NOT NULL,
 `name` CHAR(155) NOT NULL,
 `avatar` CHAR(100),
