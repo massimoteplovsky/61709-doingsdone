@@ -2,10 +2,9 @@
 
 <?php 
 
-$fields = $_SESSION['login_form_fields'];
-$email = $fields['email'] ?? '';
-$password = $fields['password'] ?? '';
-$errors = $_SESSION['errors'];
+$errors = $templateData["errors"];
+$email = $templateData["form_fields"]['email'] ?? '';
+$password = $templateData["form_fields"]['password'] ?? '';
 
 ?>
 
@@ -20,7 +19,7 @@ $errors = $_SESSION['errors'];
 </head>
 
 <!--class="overlay"-->
-<body class="<?php isset($_GET['login']) ? print('overlay') : print('body-background') ?>">
+<body class="<?php isset($_GET['login']) || $templateData['show_form'] ? print('overlay') : print('body-background') ?>">
   <h1 class="visually-hidden">Дела в порядке</h1> 
 
   <div class="page-wrapper">
@@ -83,7 +82,7 @@ $errors = $_SESSION['errors'];
     </div>
   </footer>
 
-  <div class="modal" <?php isset($_GET['login']) ? print('') : print('hidden') ?>>
+  <div class="modal" <?php isset($_GET['login']) || $templateData['show_form'] ? print('') : print('hidden') ?>>
     <a href="/exit.php" class="modal__close">Закрыть</a>
 
     <h2 class="modal__heading">Вход на сайт</h2>
@@ -92,18 +91,16 @@ $errors = $_SESSION['errors'];
       <div class="form__row">
         <label class="form__label" for="email">E-mail <sup>*</sup></label>
 
-        <input class="form__input <?php checkErrors($errors, "email") || isset($_SESSION["badmail"]) ? print("form__input--error") : print(""); ?>" type="text" name="email" id="email" value="<?php print($email);?>" placeholder="Введите e-mail"> 
-        <?php checkErrors($errors, "email") ? print("<p class='form__message'>Введите е-mail</p>") : print(""); ?>
-        <?php isset($_SESSION["badmail"]) ? print("<p class='form__message'>".$_SESSION['badmail']."</p>") : print(""); ?>
+        <input class="form__input <?php isset($errors["email"]) ? print("form__input--error") : print(""); ?>" type="text" name="email" id="email" value="<?php print($email);?>" placeholder="Введите e-mail"> 
+        <?php isset($errors["email"]) ? print("<span class='form__message'>".$errors['email']."</span>") : print(""); ?>
         
       </div>
 
       <div class="form__row">
         <label class="form__label" for="password">Пароль <sup>*</sup></label>
 
-        <input class="form__input <?php checkErrors($errors, "password") || isset($_SESSION["badpassword"]) ? print("form__input--error") : print(""); ?>" type="password" name="password" id="password" value="<?php print($password);?>" placeholder="Введите пароль">
-        <?php checkErrors($errors, "password") ? print("<p class='form__message'>Введите пароль</p>") : print(""); ?>
-        <?php isset($_SESSION["badpassword"]) ? print("<p class='form__message'>".$_SESSION['badpassword']."</p>") : print(""); ?>
+        <input class="form__input <?php isset($errors["password"]) ? print("form__input--error") : print(""); ?>" type="password" name="password" id="password" value="<?php print($password);?>" placeholder="Введите пароль">
+        <?php isset($errors["password"]) ? print("<span class='form__message'>".$errors['password']."</span>") : print(""); ?>
       </div>
 
       <div class="form__row">

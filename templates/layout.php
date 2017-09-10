@@ -40,7 +40,7 @@ $task_counter = function($task_list, $project_name = "Все"){
 </head>
 
 <!--class="overlay"-->
-<body class="<?php isset($_GET['add']) ? print('overlay') : print('') ?>">
+<body class="<?php isset($_GET['add']) || $templateData['show_form'] ? print('overlay') : print('') ?>">
     <h1 class="visually-hidden">Дела в порядке</h1>
 
     <div class="page-wrapper">
