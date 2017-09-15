@@ -67,6 +67,16 @@
                 </label>
             </td>
 
+            <td class="task__file">
+            <?php
+               if(!empty($value["Загрузить"])){
+                    print($value["Загрузить"]);
+                }
+
+            ?>
+
+            </td>
+
             <td class="task__date" >
                 <!--выведите здесь дату выполнения задачи-->
                 <?php print(htmlspecialchars($value["Дата выполнения"])); ?>

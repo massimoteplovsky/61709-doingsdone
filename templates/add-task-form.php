@@ -11,7 +11,7 @@ $date = $templateData["form_fields"]['date'] ?? '';
 ?>
 
 <div class="modal">
-  <a href="/exit.php" class="modal__close">Закрыть</a>
+  <a href="/" class="modal__close">Закрыть</a>
 
   <h2 class="modal__heading">Добавление задачи</h2>
 
@@ -64,6 +64,7 @@ $date = $templateData["form_fields"]['date'] ?? '';
           <span>Выберите файл</span>
         </label>
       </div>
+      <?php isset($errors["file"]) ? print("<span class='form__message'>".$errors['file']."</span>") : print(""); ?>
     </div>
 
     <div class="form__row form__row--controls">

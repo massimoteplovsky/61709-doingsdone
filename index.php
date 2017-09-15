@@ -2,6 +2,7 @@
 session_start();
 error_reporting(E_ALL);
 require_once "functions.php";
+require_once "db/init.php";
 
 // устанавливаем часовой пояс в Московское время
 date_default_timezone_set('Europe/Moscow');
@@ -78,16 +79,14 @@ $users = [
     ]
 ];
 
+
 //Флаг показа или скрытия всплывающих форм
 $show_form = false;
 
-
-
-//Валидация формы добавления задач
+//Валидация форм
 
 $fields = [];
 $errors = [];
-$show_form = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
@@ -112,11 +111,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $fields["date"] = sanitizeInput($_POST["date"]);
             if (!preg_match("/^(\d{2})\.(\d{2})(?:\.(\d{4}))?$/", $fields["date"])) {
                 $errors["date"] = "Введите дату в формате дд.мм.гг"; 
+            } else {
+                $today_date = date("d.m.y");
+                if( $today_date >= $fields["date"] ){
+                    $errors["date"] = "Дата окончания не может быть раньше текущей даты!";
+                }
             }
+            
+        }
+        
+        //Валидация загруженного файла
+        $fields['link'] = "";
+
+        if (isset($_FILES['preview']) && $_FILES["preview"]["error"] == UPLOAD_ERR_OK) {
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $file_tmp_name = $_FILES['preview']['tmp_name'];
+            $file_name = $_FILES["preview"]['name'];
+            $file_size = $_FILES['preview']['size'];
+            $file_type = finfo_file($finfo, $file_tmp_name);
+            $file_path = __DIR__ . '/uploads/';
+            $file_url = $file_path . $file_name;
+
+            if (($file_type !== 'image/gif' && $file_type !== 'image/png' && $file_type !== 'image/jpeg')) {
+                $errors["file"] = "Загрузите картинку в формате gif, png, jpg.";
+            }
+
+            if ($file_size > 102400) {
+                $errors["file"] = "Максимальный размер файла: 100мб";
+            }
+
+            if(is_uploaded_file($file_tmp_name)){
+               move_uploaded_file($file_tmp_name , $file_path . $file_name);
+               $fields['link'] = "<a class='download-link' href='$file_url'>$file_name</a>";
+             } 
         }
 
         // Выполнение дествий формы добавления задач
-        if($errors && isset($_POST["task_form"])){
+        if($errors){
             $show_form = true;
             print(renderTemplate('templates/add-task-form.php', ["projects" => $projects, "form_fields" => $fields, "errors" => $errors]));
 
@@ -125,6 +157,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             "Задача" => $fields['name'],
             "Дата выполнения" => $fields['date'],
             "Категория" => $fields['project'],
+            "Загрузить" => $fields['link'],
             "Выполнен" => false
             ];
 
@@ -133,7 +166,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     }
 
-    //Формы логина
+    //Форма добавления проекта
+    if(isset($_POST["project_form"])){
+
+        if(empty($_POST["name"])){
+            $errors['name'] = "Введите название проекта";
+        } else {
+            $fields['name'] = sanitizeInput($_POST["name"]);
+        }
+
+        // Выполнение дествий формы добадения проекта
+        if($errors){
+
+            $show_form = true;
+
+            $projectForm = renderTemplate('templates/add-project-form.php', ["projects" => $projects, "form_fields" => $fields, "errors" => $errors]);
+
+            print($projectForm);
+        } else {
+            array_push($projects, $fields['name']);
+        }
+    }
+
+    //Форма логина
     if(isset($_POST["login_form"])){
 
         if(empty($_POST["email"])){
@@ -159,113 +214,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                    $errors["password"] = "Неверный пароль"; 
                 }
             } else {
-                $errors["email"] = "Неверный e-mail";
-            }
+                if (!filter_var($fields["email"], FILTER_VALIDATE_EMAIL)) {
+                  $errors['email'] = "Неверный формат почты"; 
+                } else {
+                    $errors["email"] = "Неверный e-mail";
+                }  
+          }
         }
 
         // Выполнение дествий формы логина
-        if($errors && isset($_POST["login_form"])){
+        if($errors){
 
             $show_form = true;
 
-            $header_content = renderTemplate('templates/header.php', ["user" => $_SESSION['user']]);
+            $header_content = renderTemplate('templates/header.php');
 
-            $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form] );
+            $footer_content = renderTemplate('templates/footer.php');
+
+            $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form]);
 
             print($guest_content);
+        } else {
+            header("Location:index.php");
         }
     }
-} 
-
-
-
-// if (isset($_POST["task_form"])) {
-
-//     $required = ['name', 'project', 'date'];
-//     $errors = [];
-//     $rules = ['date' => 'validateDate'];
-//     $_SESSION['task_form_fields'] = $_POST;
-
-//     foreach ($_SESSION['task_form_fields'] as $key => $value) {
-
-//         if (in_array($key, $required) && $value == '') {
-//             $errors[] = $key;
-//         }
-
-//     }
-
-//     if(count($errors)){
-
-//         $_SESSION['errors'] = $errors;
-//         header("Location:index.php?add");
-
-//     } else {
-//         $subarray = [
-//             "Задача" => $_SESSION['task_form_fields']['name'],
-//             "Дата выполнения" => $_SESSION['task_form_fields']['date'],
-//             "Категория" => $_SESSION['task_form_fields']['project'],
-//             "Выполнен" => false
-//         ];
-
-//         array_unshift($task_list, $subarray);
-
-//         $_SESSION['errors'] = [];
-//         $_SESSION['task_form_fields'] = [];
-//     }
-// }
-
-//Валидация формы входа
-// if (isset($_POST["login_form"])) {
-
-//     $required = ['email', 'password'];
-//     $errors = [];
-//     $_SESSION['login_form_fields'] = $_POST;
-
-//     foreach ($_SESSION['login_form_fields'] as $key => $value) {
-
-//         if (in_array($key, $required) && $value == '') {
-//             $errors[] = $key;
-//         }
-
-//     }
-
-//     if(count($errors)){
-
-//         $_SESSION['errors'] = $errors;
-//         unsetSession(['badmail', 'badpassword']);
-//         header("Location:index.php?login");
-
-//     } else if(!empty($_POST)) {
-
-//         $_SESSION['errors'] = [];
-//         $email = $_POST['email'];
-//         $password = $_POST['password'];
-
-//         if ($user = searchUserByEmail($email, $users)) {
-
-//             unsetSession(['badmail']);
-
-//             if (password_verify($password, $user['password'])) {
-
-//                 unsetSession(['badpassword']);
-//                 $_SESSION['login_form_fields'] = [];
-//                 $_SESSION['user'] = $user;
-
-//             }else{
-
-//                 $_SESSION['badpassword'] = "Вы ввели неверный пароль";
-//                 header("Location:index.php?login");
-
-//             }
-
-//         } else {
-
-//             $_SESSION['badmail'] = "Неверный email";
-//             header("Location:index.php?login");
-
-//         }
-//     }
-// }
+}
 
 //Показ формы добавления задач
 if(isset($_GET['add'])){
@@ -276,27 +249,14 @@ if(isset($_GET['add'])){
 
 }
 
-//Проверка загруженного файла
-if(isset($_FILES["preview"]['tmp_name']) && $_FILES["preview"]["error"] == UPLOAD_ERR_OK){
-
-    $file_name = $_FILES["preview"]['name'];
-    $file_tmp_name = $_FILES["preview"]['tmp_name'];
-    $file_size = $_FILES["preview"]['size'];
-    $file_path = __DIR__ . '/uploads/';
-    $file_type = $_FILES["preview"]['type'];
-
-    if (($file_type !== 'image/gif' && $file_type !== 'image/png' && $file_type !== 'image/jpg') || ($file_size > 102400)) {
-        print("Загрузите картинку в формате gif, png, jpg. Размер файла не должен быть более 100мб");
-        exit();
-    }
-
-    if(is_uploaded_file($file_tmp_name)){
-        move_uploaded_file($file_tmp_name, $file_path . $file_name);
-    }
+//Показ формы добавления проекта
+if(isset($_GET['add_project'])){
     
+    $projectForm = renderTemplate('templates/add-project-form.php', ["projects" => $projects, "form_fields" => $fields, "errors" => $errors]);
+
+    print($projectForm);
+
 }
-
-
 
 //Показ задач для каждого проекта
 if(isset($_GET['project'])){
@@ -323,7 +283,7 @@ if(isset($_GET['project'])){
     
 } else {
     $new_arr = $task_list;
-} 
+}
 
 //Показ выполненных задач
 $showCompleted = false;
@@ -336,12 +296,16 @@ if (isset($_GET['show_completed'])) {
 }
 
 //Подключение header.php
-$header_content = renderTemplate('templates/header.php', ["user" => $_SESSION['user']]);
+$header_content = renderTemplate('templates/header.php');
+
+//Подключение footer.php
+$footer_content = renderTemplate('templates/footer.php');
 
 //Подключение шаблонов
-if(!$_SESSION['user']){
+if(!isset($_SESSION['user'])){
+
     //Подключение страницы guest.php
-    $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form] );
+    $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "footer_content" => $footer_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form] );
 
     print($guest_content);
 
@@ -351,16 +315,9 @@ if(!$_SESSION['user']){
     $page_content = renderTemplate('templates/index.php', ["tasks" => $new_arr, "complete_tasks" => $showCompleted] );
 
     //Подключение базового шаблона layout.php
-    $layout_content = renderTemplate('templates/layout.php', ["header_content" => $header_content, "content" => $page_content, "tasks" => $task_list, "projects" => $projects, "title" => "Дела в порядке!", "show_form" => $show_form]);
+    $layout_content = renderTemplate('templates/layout.php', ["header_content" => $header_content, "footer_content" => $footer_content, "content" => $page_content, "tasks" => $task_list, "projects" => $projects, "title" => "Дела в порядке!", "show_form" => $show_form]);
 
     print($layout_content);
 }
-
-
-
-
-
-
-
 
 ?>

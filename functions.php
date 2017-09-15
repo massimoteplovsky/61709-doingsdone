@@ -1,7 +1,7 @@
 <?php
 
 // Функция подключения шаблонов 
-function renderTemplate($template, $templateData){
+function renderTemplate($template, $templateData = []){
 
 	if (!isset($template)) {
         return "";

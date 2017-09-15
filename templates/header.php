@@ -1,9 +1,10 @@
+
 <header class="main-header">
-    <a href="#">
+    <a href="/">
         <img src="img/logo.png" width="153" height="42" alt="Логитип Дела в порядке">
     </a>
     <div class="main-header__side">
-        <?php if (!empty($templateData['user'])) : ?>
+        <?php if (isset($_SESSION['user'])) : ?>
             <a class="main-header__side-item button button--plus" href="/index.php?add">Добавить задачу</a>
 
             <div class="main-header__side-item user-menu">
@@ -12,7 +13,7 @@
                 </div>
 
                 <div class="user-menu__data">
-                    <p><?php print($templateData['user']['name']); ?></p>
+                    <p><?php print($_SESSION['user']['name']); ?></p>
 
                     <a href="/logout.php">Выйти</a>
                 </div>
