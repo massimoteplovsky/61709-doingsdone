@@ -7,5 +7,5 @@ if ($con == false) {
 	exit();
 }
 else {
-	print("Соединение установлено");
+	
 }

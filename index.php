@@ -79,6 +79,17 @@ $users = [
     ]
 ];
 
+// $result = select_data($con, 'SELECT * FROM user WHERE id = ?', [7]);
+// print("Функция получения данных   ");
+// print_r($result);
+
+$result2 = insert_data($con, 'users', ['email' => 'abc@bca.rue', 'name' => 'neo777']);
+print("Функция вставки данных ");
+print_r($result2);
+
+// $result3 = exec_query($con, 'UPDATE user SET name=? WHERE id = ?', ["Сергей", 7]);
+// print("Произвольная функция ");
+// print($result3);
 
 //Флаг показа или скрытия всплывающих форм
 $show_form = false;
