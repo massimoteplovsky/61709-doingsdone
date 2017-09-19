@@ -7,7 +7,7 @@
     </div>
     
     <?php if(isset($_SESSION['user'])) :?>
-    <a class="main-footer__button button button--plus">Добавить задачу</a>
+    <a href="/index.php?add" class="main-footer__button button button--plus">Добавить задачу</a>
     <?php endif; ?>
 
     <div class="main-footer__social social">

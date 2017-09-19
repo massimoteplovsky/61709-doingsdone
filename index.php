@@ -204,7 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $footer_content = renderTemplate('templates/footer.php');
 
-            $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form]);
+            $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "footer_content" => $footer_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form]);
 
             print($guest_content);
         } else {
@@ -216,6 +216,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     //Форма регистрации
     if(isset($_POST["registration_form"])){
         
+        $users = select_data($con, "SELECT * FROM user");
+
         if(empty($_POST["email"])){
             $errors["email"] = "Введите e-mail";
         } else {
