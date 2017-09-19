@@ -1,3 +1,9 @@
+<?php 
+
+$tasks = $templateData["tasks"];  
+
+?>
+
 <h2 class="content__main-heading">Список задач</h2>
 
 <form class="search-form" action="index.php" method="post">
@@ -47,13 +53,13 @@
 
 <table class="tasks">
 
-    <?php foreach ($templateData["tasks"] as $key => $value) :?>
+    <?php foreach ($tasks as $key => $value) :?>
 
         <?php
             $complete_task = '';
             $show_complete_tasks = '';
 
-            if($value['Выполнен']) {
+            if($value['complete']) {
                 $complete_task = 'task--completed';
                 $show_complete_tasks = $hidden;
             }
@@ -63,11 +69,11 @@
             <td class="task__select">
                 <label class="checkbox task__checkbox">
                     <input class="checkbox__input visually-hidden" type="checkbox">
-                    <span class="checkbox__text"><?php print(htmlspecialchars($value["Задача"])); ?></span>
+                    <span class="checkbox__text"><?php print(htmlspecialchars($value["name"])); ?></span>
                 </label>
             </td>
 
-            <td class="task__file">
+            <!-- <td class="task__file">
             <?php
                if(!empty($value["Загрузить"])){
                     print($value["Загрузить"]);
@@ -75,11 +81,11 @@
 
             ?>
 
-            </td>
+            </td> -->
 
             <td class="task__date" >
                 <!--выведите здесь дату выполнения задачи-->
-                <?php print(htmlspecialchars($value["Дата выполнения"])); ?>
+                <?php print(htmlspecialchars(date("d.m.Y", strtotime($value["deadline"])))); ?>
             </td>
 
             <td class="task__controls">
@@ -87,11 +93,13 @@
 
                 <ul class="expand-list hidden">
                     <li class="expand-list__item">
-                        <a href="#">Выполнить</a>
+                        <a href="/index.php?is_complete=<?php print($value['id']); ?>">
+                            <?php $value['complete'] ? print("Выполнить") : print("Выполнено") ?>
+                        </a>
                     </li>
 
                     <li class="expand-list__item">
-                        <a href="#">Удалить</a>
+                        <a href="/delete-task.php?id=<?php print($value['id']); ?>">Удалить</a>
                     </li>
                 </ul>
             </td>

@@ -1,3 +1,15 @@
+<?php 
+
+$errors = $templateData["errors"];
+$email = $templateData["form_fields"]['name'] ?? '';
+$password = $templateData["form_fields"]['password'] ?? '';
+$name = $templateData["form_fields"]['name'] ?? '';
+$date = $templateData["form_fields"]['date'] ?? '';
+
+print_r($errors);
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -53,7 +65,7 @@
             <div class="form__row form__row--controls">
               <p class="error-massage">Пожалуйста, исправьте ошибки в форме</p>
 
-              <input class="button" type="submit" name="" value="Зарегистрироваться">
+              <input class="button" type="submit" name="registration_form" value="Зарегистрироваться">
             </div>
           </form>
         </main>

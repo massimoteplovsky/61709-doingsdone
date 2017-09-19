@@ -46,9 +46,17 @@ $password = $templateData["form_fields"]['password'] ?? '';
   <?php print($templateData["footer_content"]); ?>
 
   <div class="modal" <?php isset($_GET['login']) || $templateData['show_form'] ? print('') : print('hidden') ?>>
-    <a href="/" class="modal__close">Закрыть</a>
+    <a href="/index.php" class="modal__close">Закрыть</a>
 
     <h2 class="modal__heading">Вход на сайт</h2>
+    
+    <?php if($errors) : ?>
+      <p class="error-massage">Пожалуйста, исправьте ошибки в форме</p>
+    <?php endif; ?>
+
+    <?php if(isset($_SESSION['login_title'])) : ?>
+      <p class="subtitle" style="text-align: center; color: #00de00;"><?php print($_SESSION['login_title']); ?></p>
+    <?php endif; ?>
 
     <form class="form" class="" action="index.php" method="post">
       <div class="form__row">

@@ -4,14 +4,13 @@
 
 $errors = $templateData["errors"];
 $task_name = $templateData["form_fields"]['name'] ?? '';
-$project_name = $templateData["form_fields"]['project'] ?? '';
+$project_id = $templateData["form_fields"]['project'] ?? '';
 $date = $templateData["form_fields"]['date'] ?? '';
-
-
+$projects = array_merge([['id' => 0, 'name' => 'Выберите проект']], $templateData['projects']);
 ?>
 
 <div class="modal">
-  <a href="/" class="modal__close">Закрыть</a>
+  <a href="/index.php" class="modal__close">Закрыть</a>
 
   <h2 class="modal__heading">Добавление задачи</h2>
 
@@ -33,10 +32,8 @@ $date = $templateData["form_fields"]['date'] ?? '';
       <select class="form__input form__input--select <?php isset($errors["project"]) ? print("form__input--error") : print(""); ?>"
               name="project"
               id="project">
-        <option value="" selected>Выберите проект</option>
-      <?php foreach ($templateData['projects'] as $value): ?>
-        <?php if($value == "Все") { continue;} ?>
-        <option value="<?php print($value); ?>" <?php $project_name == $value ? print("selected") : print(""); ?>><?php print($value); ?></option> 
+      <?php foreach ($projects as $key => $value): ?>
+        <option value="<?php print($value['id']); ?>" <?php $project_id == $value['id'] ? print("selected") : print(""); ?>><?php print($value['name']); ?></option> 
       <?php endforeach ?>
       </select>
       <?php isset($errors["project"]) ? print("<span class='form__message'>".$errors['project']."</span>") : print(""); ?>

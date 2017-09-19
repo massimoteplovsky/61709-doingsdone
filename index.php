@@ -20,72 +20,43 @@ $days_until_deadline = ($task_deadline_ts - $current_ts) / 86400;
 // показывать или нет выполненные задачи
 $show_complete_tasks = rand(0, 1);
 
-$projects = ["Все", "Входящие", "Учеба", "Работа", "Домашние дела", "Авто"];
+$task_list = [];
 
-$task_list = [
-    [
-    "Задача" => "Собеседование в IT компании",
-    "Дата выполнения" => "01.06.2018",
-    "Категория" => "Работа",
-    "Выполнен" => false
-    ],
-    [
-    "Задача" => "Выполнить тестовое задание",
-    "Дата выполнения" => "25.05.2018",
-    "Категория" => "Работа",
-    "Выполнен" => false
-    ],
-    [
-    "Задача" => "Сделать задание первого раздела",
-    "Дата выполнения" => "21.04.2018",
-    "Категория" => "Учеба",
-    "Выполнен" => true
-    ],
-    [
-    "Задача" => "Встреча с другом",
-    "Дата выполнения" => "22.04.2018",
-    "Категория" => "Входящие",
-    "Выполнен" => false
-    ],
-    [
-    "Задача" => "Купить корм для кота",
-    "Дата выполнения" => "-",
-    "Категория" => "Домашние дела",
-    "Выполнен" => false
-    ],
-    [
-    "Задача" => "Заказать пиццу",
-    "Дата выполнения" => "-",
-    "Категория" => "Домашние дела",
-    "Выполнен" => false
-    ]
-];
+if(isset($_SESSION['user'])){
+    $user = $_SESSION['user'];
+    $projects = select_data($con, "SELECT id, name FROM projects WHERE user_id = ?", [$user['id']]);
+    $task_list = select_data($con, "SELECT id, name, project_id, deadline, complete FROM tasks WHERE user_id = ?", [$user['id']]);
 
-$users = [
-    [
-    'email' => 'ignat.v@gmail.com',
-    'name' => 'Игнат',
-    'password' => '$2y$10$OqvsKHQwr0Wk6FMZDoHo1uHoXd4UdxJG/5UDtUiie00XaxMHrW8ka'
-    ],
-    [
-    'email' => 'kitty_93@li.ru',
-    'name' => 'Леночка',
-    'password' => '$2y$10$bWtSjUhwgggtxrnJ7rxmIe63ABubHQs0AS0hgnOo41IEdMHkYoSVa'
-    ],
-    [
-    'email' => 'warrior07@mail.ru',
-    'name' => 'Руслан',
-    'password' => '$2y$10$2OxpEH7narYpkOT1H5cApezuzh10tZEEQ2axgFOaKW.55LxIJBgWW'
-    ]
-];
+    if(isset($_GET['is_complete'])){
+        $is_exist = false;
+        $task_id = $_GET['is_complete'];
+        $is_task_exist = select_data($con, 'SELECT id, complete FROM tasks WHERE user_id = ?', [$user['id']]);
+
+        foreach ($is_task_exist as $key => $value) {
+            if($value['id'] == $task_id){
+                $is_completed = $value['complete'];
+                $is_exist = true;
+            } 
+        }
+
+        if($is_exist){
+            $is_completed ? $is_completed = 0 : $is_completed = 1;
+            exec_query($con, 'UPDATE tasks SET complete=? WHERE id = ?', [$is_completed, $task_id]);
+            header("Location:index.php");
+        } else {
+            header("HTTP/1.0 404 Not Found");
+            exit("Не могу отобразить страницу");
+        }
+    }
+}
 
 // $result = select_data($con, 'SELECT * FROM user WHERE id = ?', [7]);
 // print("Функция получения данных   ");
 // print_r($result);
 
-$result2 = insert_data($con, 'users', ['email' => 'abc@bca.rue', 'name' => 'neo777']);
-print("Функция вставки данных ");
-print_r($result2);
+// $result2 = insert_data($con, 'users', ['email' => 'abc@bca.rue', 'name' => 'neo777']);
+// print("Функция вставки данных ");
+// print_r($result2);
 
 // $result3 = exec_query($con, 'UPDATE user SET name=? WHERE id = ?', ["Сергей", 7]);
 // print("Произвольная функция ");
@@ -95,7 +66,7 @@ print_r($result2);
 $show_form = false;
 
 //Валидация форм
-
+  
 $fields = [];
 $errors = [];
 
@@ -120,14 +91,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errors["date"] = "Введите дату";
         } else {
             $fields["date"] = sanitizeInput($_POST["date"]);
-            if (!preg_match("/^(\d{2})\.(\d{2})(?:\.(\d{4}))?$/", $fields["date"])) {
-                $errors["date"] = "Введите дату в формате дд.мм.гг"; 
-            } else {
-                $today_date = date("d.m.y");
-                if( $today_date >= $fields["date"] ){
-                    $errors["date"] = "Дата окончания не может быть раньше текущей даты!";
-                }
-            }
+            $formattedDate = check_date($fields["date"]);
+            if (!$formattedDate) {
+                $errors["date"] = "Введите дату в формате дд.мм.гг. Введенная дата не должна быть раньше текущей даты!"; 
+            } 
+
             
         }
         
@@ -164,15 +132,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             print(renderTemplate('templates/add-task-form.php', ["projects" => $projects, "form_fields" => $fields, "errors" => $errors]));
 
         } else {
-            $subarray = [
-            "Задача" => $fields['name'],
-            "Дата выполнения" => $fields['date'],
-            "Категория" => $fields['project'],
-            "Загрузить" => $fields['link'],
-            "Выполнен" => false
-            ];
-
-            array_unshift($task_list, $subarray);
+            insert_data($con, 'tasks', ['user_id' => $user['id'] ,'name' => $fields['name'], 'complete' => 0, 'deadline' => $formattedDate, 'project_id' => $fields['project'], 'file' => $fields['link']]);
+            header("Location:index.php");
         }
 
     }
@@ -191,16 +152,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $show_form = true;
 
-            $projectForm = renderTemplate('templates/add-project-form.php', ["projects" => $projects, "form_fields" => $fields, "errors" => $errors]);
+            $projectForm = renderTemplate('templates/add-project-form.php', ["show_form" => $show_form, "form_fields" => $fields, "errors" => $errors]);
 
             print($projectForm);
         } else {
-            array_push($projects, $fields['name']);
+            insert_data($con, 'projects', ['user_id' => $user['id'] ,'name' => $fields['name']]);
+            header("Location:index.php");
         }
     }
 
     //Форма логина
     if(isset($_POST["login_form"])){
+
+        $users = select_data($con, "SELECT * FROM user");
 
         if(empty($_POST["email"])){
             $errors["email"] = "Введите e-mail";
@@ -225,18 +189,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                    $errors["password"] = "Неверный пароль"; 
                 }
             } else {
-                if (!filter_var($fields["email"], FILTER_VALIDATE_EMAIL)) {
-                  $errors['email'] = "Неверный формат почты"; 
-                } else {
-                    $errors["email"] = "Неверный e-mail";
-                }  
-          }
+                $errors["email"] = "Неверный e-mail";
+            }
         }
 
         // Выполнение дествий формы логина
         if($errors){
-
+            
             $show_form = true;
+
+            unset_sessions(['login_title']);
 
             $header_content = renderTemplate('templates/header.php');
 
@@ -246,10 +208,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             print($guest_content);
         } else {
+            unset_sessions(['login_title']);
             header("Location:index.php");
         }
     }
+
+    //Форма регистрации
+    if(isset($_POST["registration_form"])){
+        
+        if(empty($_POST["email"])){
+            $errors["email"] = "Введите e-mail";
+        } else {
+            $fields["email"] = sanitizeInput($_POST["email"]);
+            if (!filter_var($fields["email"], FILTER_VALIDATE_EMAIL)) {
+              $errors['email'] = "Неверный формат почты"; 
+            }
+            if ($user = searchUserByEmail($fields["email"], $users)) {
+                $errors['email'] = "Почта уже используется!";
+            }
+        }
+
+        if(empty($_POST["password"])){
+            $errors["password"] = "Введите пароль";
+        } else {
+            $fields["password"] = sanitizeInput($_POST["password"]);
+        } 
+
+        if(empty($_POST["name"])){
+            $errors["name"] = "Введите имя";
+        } else {
+            $fields["name"] = sanitizeInput($_POST["name"]);
+        } 
+
+        // Выполнение дествий формы регистрации
+        if($errors){
+
+            $_SESSION['errors'] = $errors;
+            $_SESSION['fields'] = $fields;
+     
+            header("Location: register.php");
+            exit();
+        } else {
+            $_SESSION['login_title'] = "Теперь вы можете войти, используя свой email и пароль";
+            insert_data($con, 'user', ['email' => $fields['email'], 'name' => $fields['name'], 'password' => password_hash($fields['password'], PASSWORD_DEFAULT)]);
+            header("Location: index.php?login");
+            exit();
+        }
+    }
 }
+
+//Удаление ссесий форм
+unset_sessions(['errors', 'fields']);
 
 //Показ формы добавления задач
 if(isset($_GET['add'])){
@@ -270,30 +279,39 @@ if(isset($_GET['add_project'])){
 }
 
 //Показ задач для каждого проекта
+$project_task = [];
+
 if(isset($_GET['project'])){
 
-    $number = intval($_GET['project']);
+    $project_id = intval($_GET['project']);
 
-    if($number){
+    if($project_id){
 
-        if(!isset($projects[$number])) {
+        $id_in_projects_array = 0;
+
+        foreach ($projects as $key => $value) {
+            if($value["id"] == $project_id){
+                ++$id_in_projects_array;
+            }  
+        } 
+
+        if(!$id_in_projects_array){
             http_response_code(404);
+            exit("Не могу отобразить страницу. Передано неверное значение параметра!!!");
         }
 
-        $new_arr = [];
-        $project = $projects[$number];
-
         foreach ($task_list as $key => $value) {
-            if($value["Категория"] == $project){
-                array_push($new_arr, $task_list[$key]);
+            if($value["project_id"] == $project_id){
+                array_push($project_task, $value);
             }
         }
     } else {
-        $new_arr = $task_list;
+        http_response_code(404);
+        exit("Не могу отобразить страницу. Передано строковое значение параметра!!!");
     }
     
 } else {
-    $new_arr = $task_list;
+    $project_task = $task_list;
 }
 
 //Показ выполненных задач
@@ -314,7 +332,6 @@ $footer_content = renderTemplate('templates/footer.php');
 
 //Подключение шаблонов
 if(!isset($_SESSION['user'])){
-
     //Подключение страницы guest.php
     $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "footer_content" => $footer_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form] );
 
@@ -323,7 +340,7 @@ if(!isset($_SESSION['user'])){
 } else {
 
     //Подключение главной страницы index.php
-    $page_content = renderTemplate('templates/index.php', ["tasks" => $new_arr, "complete_tasks" => $showCompleted] );
+    $page_content = renderTemplate('templates/index.php', ["tasks" => $project_task, "complete_tasks" => $showCompleted] );
 
     //Подключение базового шаблона layout.php
     $layout_content = renderTemplate('templates/layout.php', ["header_content" => $header_content, "footer_content" => $footer_content, "content" => $page_content, "tasks" => $task_list, "projects" => $projects, "title" => "Дела в порядке!", "show_form" => $show_form]);

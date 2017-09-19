@@ -15,7 +15,9 @@ function select_data($link, $sql, $data = []){
         }
 
         if($res){
-            $db_data = mysqli_fetch_assoc($res); 
+            while ($row = mysqli_fetch_array($res, MYSQLI_ASSOC)) {
+                $db_data[] = $row;
+            }
         }
         mysqli_stmt_close($stmt);
         return $db_data;
@@ -44,7 +46,7 @@ function insert_data($link, $table, $data){
         return $str = substr($str,0,-2);
     }
 
-    $sql = "INSERT INTO $table (". implode(', ', $col) . ") VALUES (" . placeholders($field) . ")";
+    $sql = "INSERT INTO $table (". implode(', ', $col) . ") VALUES (" . placeholders($field) . ")";   
 
     $stmt = db_get_prepare_stmt($link, $sql, $field);
    
@@ -53,7 +55,7 @@ function insert_data($link, $table, $data){
         mysqli_stmt_close($stmt);
         return mysqli_insert_id($link);
     } else {
-        return false;
+        print('false');
     } 
     
 }
@@ -98,13 +100,6 @@ function searchUserByEmail($email, $users){
     return $result;
 }
 
-//Функция удаления сессий
-function unsetSession($session_name){
-    foreach ($session_name as $key) {
-        unset($_SESSION[$key]);
-    }
-}
-
 //Функция проверки ошибок в формах
 function checkErrors($errors_arr, $field){
   foreach ($errors_arr as $value) {
@@ -119,6 +114,69 @@ function sanitizeInput($data){
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
     return $data;
+}
+
+function task_counter($tasks, $project_id){
+
+    $counter = 0;
+
+    foreach ($tasks as $key => $value) {
+        if($value["project_id"] == $project_id || $project_id == 0){
+            ++$counter;
+        }
+    }
+
+    return $counter;
+}
+
+function unset_sessions($array){
+    foreach ($array as $value) {
+        unset($_SESSION[$value]);
+    }
+}
+
+function check_date($str)
+{
+    $translate = [
+        'сегодня' => strtotime('23:59:59'),
+        'завтра' => time() + 86400,
+        'послезавтра' => time() + 172800,
+        'понедельник' => strtotime('Monday'),
+        'вторник' => strtotime('Tuesday'),
+        'среда' => strtotime('Wednesday'),
+        'четверг' => strtotime('Thursday'),
+        'пятница' => strtotime('Friday'),
+        'суббота' => strtotime('Saturday'),
+        'воскресенье' => strtotime('Sunday')
+    ];
+    $pattern = '(((\d{2})\.(\d{2})\.(\d{4}))|' . implode('|', array_keys($translate)) . ')(\s+в\s+((\d{2}):(\d{2})))?';
+    $matches = [];
+    $matched = preg_match("/^$pattern$/", mb_strtolower($str), $matches);
+    if (!$matched) {
+        return false;
+    }
+    if (isset($matches[8]) && (int)$matches[8] > 23) {
+        return false;
+    }
+    if (isset($matches[9]) && (int)$matches[9] > 59) {
+        return false;
+    }
+    $date = $matches[1];
+    if (isset($translate[$date])) {
+        $date = date('Y-m-d', $translate[$date]);
+    } else {
+        $date = $matches[5] . '-' . $matches[4] . '-' . $matches[3];
+    }
+    //Подставляю время в зависимости от текущего времени и переданной строки
+    if (isset($matches[7])) {
+        $time = $matches[7];
+    } else if ($date == date('Y-m-d', time())) {
+        $time = "23:59:59";
+    } else {
+        $time = date('H:i:s', time());
+    }
+    $result = "$date $time";
+    return ($result >= date('Y-m-d H:i:s', time())) ? $result : null;
 }
 
 ?>

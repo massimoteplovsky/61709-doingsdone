@@ -1,3 +1,8 @@
+<?php session_start();
+$errors = $_SESSION['errors'] ?? $_SESSION['errors'];
+$fields = $_SESSION['fields'] ?? $_SESSION['fields'];
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,7 +19,7 @@
   <div class="page-wrapper">
     <div class="container container--with-sidebar">
       <header class="main-header">
-        <a href="/">
+        <a href="/index.php">
           <img src="../img/logo.png" width="153" height="42" alt="Логитип Дела в порядке">
         </a>
       </header>
@@ -29,31 +34,36 @@
         <main class="content__main">
           <h2 class="content__main-heading">Регистрация аккаунта</h2>
 
-          <form class="form" action="index.html" method="post">
+          <form class="form" action="index.php" method="post">
+            <?php if($errors) : ?>
+              <p class="error-massage">Пожалуйста, исправьте ошибки в форме</p>
+            <?php endif; ?>
             <div class="form__row">
               <label class="form__label" for="email">E-mail <sup>*</sup></label>
 
-              <input class="form__input form__input--error" type="text" name="email" id="email" value="" placeholder="Введите e-mail">
+              <input class="form__input <?php isset($errors["email"]) ? print("form__input--error") : print(""); ?>" type="text" name="email" id="email" value="<?php print($fields['email']); ?>" placeholder="Введите e-mail">
 
-              <p class="form__message">E-mail введён некорректно</p>
+              <?php isset($errors["email"]) ? print("<span class='form__message'>".$errors['email']."</span>") : print(""); ?>
             </div>
 
             <div class="form__row">
               <label class="form__label" for="password">Пароль <sup>*</sup></label>
 
-              <input class="form__input" type="password" name="password" id="password" value="" placeholder="Введите пароль">
+              <input class="form__input <?php isset($errors["password"]) ? print("form__input--error") : print(""); ?>" type="password" name="password" id="password" value="<?php print($fields['password']); ?>" placeholder="Введите пароль">
+              <?php isset($errors["password"]) ? print("<span class='form__message'>".$errors['password']."</span>") : print(""); ?>
             </div>
 
             <div class="form__row">
               <label class="form__label" for="name">Имя <sup>*</sup></label>
 
-              <input class="form__input" type="text" name="name" id="name" value="" placeholder="Введите имя">
+              <input class="form__input <?php isset($errors["name"]) ? print("form__input--error") : print(""); ?>" type="text" name="name" id="name" value="<?php print($fields['name']); ?>" placeholder="Введите имя">
+              <?php isset($errors["name"]) ? print("<span class='form__message'>".$errors['name']."</span>") : print(""); ?>
             </div>
 
             <div class="form__row form__row--controls">
-              <p class="error-massage">Пожалуйста, исправьте ошибки в форме</p>
+              
 
-              <input class="button" type="submit" name="" value="Зарегистрироваться">
+              <input class="button" type="submit" name="registration_form" value="Зарегистрироваться">
             </div>
           </form>
         </main>

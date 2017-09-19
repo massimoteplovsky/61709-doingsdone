@@ -1,33 +1,7 @@
-<?php
-
-// устанавливаем часовой пояс в Московское время
-date_default_timezone_set('Europe/Moscow');
-
-$days = rand(-3, 3);
-$task_deadline_ts = strtotime("+" . $days . " day midnight"); // метка времени даты выполнения задачи
-$current_ts = strtotime('now midnight'); // текущая метка времени
-
-// запишите сюда дату выполнения задачи в формате дд.мм.гггг
-$date_deadline = date("d.m.Y", $task_deadline_ts);
-
-// в эту переменную запишите кол-во дней до даты задачи
-$days_until_deadline = ($task_deadline_ts - $current_ts) / 86400;
-
-$task_counter = function($task_list, $project_name = "Все"){
-
-    $counter = 0;
-
-    foreach ($task_list as $key => $value) {
-        if($value["Категория"] == $project_name || $project_name == "Все"){
-            ++$counter;
-        }
-    }
-
-    return $counter;
-}    
-
+<?php 
+    $projects = array_merge([['id' => 0, 'name' => 'Все']], $templateData['projects']);
+    $tasks = $templateData['tasks'];
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -53,34 +27,32 @@ $task_counter = function($task_list, $project_name = "Все"){
                     <h2 class="content__side-heading">Проекты</h2>
 
                     <nav class="main-navigation">
-                        <ul class="main-navigation__list">
+                        <ul class="main-navigation__list">  
 
-                            <?php 
+                            <?php foreach ($projects as $key => $value) : ?>
 
-                            $count = count($templateData["projects"]);
-                            $index = 0;
+                                <?php 
+                                    $add_class = '';
+                                    if(isset($_GET['project']) && $_GET['project'] == $value['id']){
+                                        $add_class = 'main-navigation__list-item--active';
+                                    }
+                                ?> 
 
-                            ?>
-                            
-                            <?php while( $index < $count ) :?>
+                                <?php if($value['id'] == 0) : ?>
+                                <li class="main-navigation__list-item <?php !isset($_GET['project']) ? print('main-navigation__list-item--active') : print(''); ?>">
+                                    <a class="main-navigation__list-item-link" href="index.php"><?php print($value['name']); ?></a>
+                                    <span class="main-navigation__list-item-count"><?php print(task_counter($tasks, $value['id'])); ?></span>
+                                </li>
 
-                                <?php if($index == 0) :?>
+                                <?php else : ?>
 
-                                    <li class="main-navigation__list-item main-navigation__list-item--active">
-                                        <a class="main-navigation__list-item-link" href="index.php"><? echo $templateData["projects"][$index] ?></a>
-                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($templateData["tasks"], $templateData["projects"][$index]); ?></span>
-                                    </li>
 
-                                <?php else: ?>
-
-                                    <li class="main-navigation__list-item">
-                                        <a class="main-navigation__list-item-link" href="index.php?project=<?php print($index) ?>"><? echo $templateData["projects"][$index] ?></a>
-                                        <span class="main-navigation__list-item-count"><?php echo $task_counter($templateData["tasks"], $templateData["projects"][$index]); ?></span>
-                                    </li>
-
-                                <?php endif ?>    
-                                <?php $index++; ?>
-                            <?php endwhile; ?>
+                                <li class="main-navigation__list-item <?php print($add_class); ?>">
+                                    <a class="main-navigation__list-item-link" href="index.php?project=<?php print($value['id']); ?>"><?php print($value['name']); ?></a>
+                                    <span class="main-navigation__list-item-count"><?php print(task_counter($tasks, $value['id'])); ?></span>
+                                </li>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
 
                         </ul>
                     </nav>

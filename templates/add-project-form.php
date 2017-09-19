@@ -8,8 +8,8 @@ $project_name = $templateData["form_fields"]['name'] ?? '';
 
 ?>
 
-<div class="modal" <?php isset($_GET['add_project']) ? print("") : print("hidden") ?>>
-  <a href="/" class="modal__close">Закрыть</a>
+<div class="modal" <?php isset($_GET['add_project']) || $templateData['show_form'] ? print("") : print("hidden") ?>>
+  <a href="/index.php" class="modal__close">Закрыть</a>
 
   <h2 class="modal__heading">Добавление проекта</h2>
 
