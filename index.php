@@ -5,34 +5,41 @@ require_once "functions.php";
 require_once "db/init.php";
 
 // устанавливаем часовой пояс в Московское время
-date_default_timezone_set('Europe/Moscow');
+// date_default_timezone_set('Europe/Moscow');
 
-$days = rand(-3, 3);
-$task_deadline_ts = strtotime("+" . $days . " day midnight"); // метка времени даты выполнения задачи
-$current_ts = strtotime('now midnight'); // текущая метка времени
+// $days = rand(-3, 3);
+// $task_deadline_ts = strtotime("+" . $days . " day midnight"); // метка времени даты выполнения задачи
+// $current_ts = strtotime('now midnight'); // текущая метка времени
 
-// запишите сюда дату выполнения задачи в формате дд.мм.гггг
-$date_deadline = date("d.m.Y", $task_deadline_ts);
+// // запишите сюда дату выполнения задачи в формате дд.мм.гггг
+// $date_deadline = date("d.m.Y", $task_deadline_ts);
 
-// в эту переменную запишите кол-во дней до даты задачи
-$days_until_deadline = ($task_deadline_ts - $current_ts) / 86400;
+// // в эту переменную запишите кол-во дней до даты задачи
+// $days_until_deadline = ($task_deadline_ts - $current_ts) / 86400;
 
-// показывать или нет выполненные задачи
-$show_complete_tasks = rand(0, 1);
+// // показывать или нет выполненные задачи
+// $show_complete_tasks = rand(0, 1);
 
 $task_list = [];
 
-if(isset($_SESSION['user'])){
-    $user = $_SESSION['user'];
-    $projects = select_data($con, "SELECT id, name FROM projects WHERE user_id = ?", [$user['id']]);
-    $task_list = select_data($con, "SELECT id, name, project_id, deadline, complete FROM tasks WHERE user_id = ?", [$user['id']]);
+$users = select_data($con, "SELECT * FROM user");
 
+if(isset($_SESSION['user'])){
+
+    //Массив с данными из созданой сессии при регистрации
+    $user = $_SESSION['user'];
+    //Массив с данными по проектам из бд определенного пользователя
+    $projects = select_data($con, "SELECT id, name FROM projects WHERE user_id = ?", [$user['id']]);
+    //Массив с данными по задачам из бд определенного пользователя
+    $task_list = select_data($con, "SELECT id, name, project_id, deadline, complete, file FROM tasks WHERE user_id = ?", [$user['id']]);
+    
+    //Изменение статуса выполнения задачи
     if(isset($_GET['is_complete'])){
+
         $is_exist = false;
         $task_id = $_GET['is_complete'];
-        $is_task_exist = select_data($con, 'SELECT id, complete FROM tasks WHERE user_id = ?', [$user['id']]);
 
-        foreach ($is_task_exist as $key => $value) {
+        foreach ($task_list as $key => $value) {
             if($value['id'] == $task_id){
                 $is_completed = $value['complete'];
                 $is_exist = true;
@@ -48,19 +55,58 @@ if(isset($_SESSION['user'])){
             exit("Не могу отобразить страницу");
         }
     }
+    
+    //Удаление задачи
+    if(isset($_GET['delete'])){
+
+        $is_exist = false;
+        $task_id = $_GET['delete'];
+
+        foreach ($task_list as $key => $value) {
+            if($value['id'] == $task_id){
+                $is_exist = true;
+            } 
+        }
+
+        if($is_exist){
+            exec_query($con, 'DELETE FROM tasks WHERE id = ?', [$task_id]);
+            header("Location:index.php");
+        } else {
+            header("HTTP/1.0 404 Not Found");
+            exit("Не могу отобразить страницу");
+        }
+    }
+
+    //Дублирование задачи
+    if(isset($_GET['clone'])){
+
+        $is_exist = false;
+        $task_id = $_GET['clone'];
+        $is_task_exist = select_data($con, 'SELECT * FROM tasks WHERE user_id = ? AND id = ?', [$user['id'], $task_id]);
+        
+        foreach ($is_task_exist as $key => $value) {
+            if($value['id'] == $task_id){
+                $is_exist = true;
+            } 
+        }
+
+        extract($is_task_exist[0], EXTR_PREFIX_SAME, "wddx");
+
+        if($is_exist){
+            insert_data($con, 'tasks', ['user_id' => $user_id ,'name' => $name, 'complete' => $complete, 'deadline' => $deadline, 'project_id' => $project_id, 'file' => $file]);
+            header("Location:index.php");
+        } else {
+            header("HTTP/1.0 404 Not Found");
+            exit("Не могу отобразить страницу");
+        }
+    }
+
+    //Фильтрация задач
+    if(isset($_GET['filter'])){
+        $filter_type = $_GET['filter'];
+        $task_list = filter_tasks($con, $filter_type, $user);
+    }
 }
-
-// $result = select_data($con, 'SELECT * FROM user WHERE id = ?', [7]);
-// print("Функция получения данных   ");
-// print_r($result);
-
-// $result2 = insert_data($con, 'users', ['email' => 'abc@bca.rue', 'name' => 'neo777']);
-// print("Функция вставки данных ");
-// print_r($result2);
-
-// $result3 = exec_query($con, 'UPDATE user SET name=? WHERE id = ?', ["Сергей", 7]);
-// print("Произвольная функция ");
-// print($result3);
 
 //Флаг показа или скрытия всплывающих форм
 $show_form = false;
@@ -72,7 +118,7 @@ $errors = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    //Поля формы добавления задач
+    //Форма добавления задач
     if(isset($_POST["task_form"])){
 
         if(empty($_POST["name"])){
@@ -94,9 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $formattedDate = check_date($fields["date"]);
             if (!$formattedDate) {
                 $errors["date"] = "Введите дату в формате дд.мм.гг. Введенная дата не должна быть раньше текущей даты!"; 
-            } 
-
-            
+            }  
         }
         
         //Валидация загруженного файла
@@ -122,11 +166,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if(is_uploaded_file($file_tmp_name)){
                move_uploaded_file($file_tmp_name , $file_path . $file_name);
-               $fields['link'] = "<a class='download-link' href='$file_url'>$file_name</a>";
+               $fields['link'] = "/uploads/$file_name";
              } 
         }
 
-        // Выполнение дествий формы добавления задач
+        // Выполнение действий формы добавления задач
         if($errors){
             $show_form = true;
             print(renderTemplate('templates/add-task-form.php', ["projects" => $projects, "form_fields" => $fields, "errors" => $errors]));
@@ -163,8 +207,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     //Форма логина
     if(isset($_POST["login_form"])){
-
-        $users = select_data($con, "SELECT * FROM user");
 
         if(empty($_POST["email"])){
             $errors["email"] = "Введите e-mail";
@@ -215,8 +257,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     //Форма регистрации
     if(isset($_POST["registration_form"])){
-        
-        $users = select_data($con, "SELECT * FROM user");
 
         if(empty($_POST["email"])){
             $errors["email"] = "Введите e-mail";
@@ -257,9 +297,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     }
+    
+    //Форма поиска
+    if(isset($_POST["search_form"])){
+        if(!empty($_POST["search-field"])){
+
+            $search_value = sanitizeInput($_POST["search-field"]);
+            $query = select_data($con, "SELECT * FROM tasks WHERE name LIKE '$search_value'");
+
+            if($query){
+                $task_list = $query;
+                $project_task = $task_list;
+            } else{
+                $task_list = $task_list;
+            }
+        } else {
+            header("Location: index.php");
+        }
+    }
 }
 
-//Удаление ссесий форм
+//Удаление сесcий форм
 unset_sessions(['errors', 'fields']);
 
 //Показ формы добавления задач

@@ -43,7 +43,9 @@ function insert_data($link, $table, $data){
             $str .= "?, ";
         }
 
-        return $str = substr($str,0,-2);
+        $str = substr($str,0,-2);
+
+        return $str;
     }
 
     $sql = "INSERT INTO $table (". implode(', ', $col) . ") VALUES (" . placeholders($field) . ")";   
@@ -55,7 +57,7 @@ function insert_data($link, $table, $data){
         mysqli_stmt_close($stmt);
         return mysqli_insert_id($link);
     } else {
-        print('false');
+        return null;
     } 
     
 }
@@ -135,8 +137,7 @@ function unset_sessions($array){
     }
 }
 
-function check_date($str)
-{
+function check_date($str){
     $translate = [
         'сегодня' => strtotime('23:59:59'),
         'завтра' => time() + 86400,
@@ -178,5 +179,27 @@ function check_date($str)
     $result = "$date $time";
     return ($result >= date('Y-m-d H:i:s', time())) ? $result : null;
 }
+
+function filter_tasks($con, $filter_type, $user)
+    {
+        switch ($filter_type) {
+            case 'today' :
+                return select_data($con, "SELECT id, name, project_id, complete, deadline FROM tasks 
+                                          WHERE user_id = ? AND DATE_FORMAT(deadline, '%Y-%m-%d') = CURDATE()", [$user['id']]);
+                break;
+            case 'tomorrow':
+                return select_data($con, "SELECT id, name, project_id, complete, DATE_FORMAT(deadline, '%Y-%m-%d %H:%i') as deadline FROM tasks 
+                                          WHERE user_id = ? AND DATE_FORMAT(deadline, '%Y-%m-%d') = DATE_ADD(CURDATE(), INTERVAL + 1 DAY)", [$user['id']]);
+                break;
+            case 'overdue':
+                return select_data($con, "SELECT id, name, project_id, deadline, complete FROM tasks 
+                                          WHERE user_id = ? AND deadline < CURDATE() AND complete != 1", [$user['id']]);
+                break;
+            default: 
+                header("Location: index.php");    
+        }
+
+
+    }
 
 ?>
