@@ -1,8 +1,10 @@
 <?php 
 session_start();
 error_reporting(E_ALL);
+require_once "vaendor/autoload.php";
 require_once "functions.php";
 require_once "db/init.php";
+require_once "send-mail.php";
 
 // устанавливаем часовой пояс в Московское время
 // date_default_timezone_set('Europe/Moscow');

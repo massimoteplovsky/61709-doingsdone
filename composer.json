@@ -1,6 +1,11 @@
 {
-    "name": "doingsdone",
-    "description": "Личный проект «Дела в Порядке» от HTML Academy",
-    "type": "project",
+    "name": "maxim/61709-doingsdone",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Maxim",
+            "email": "www.maximalist@mail.ru"
+        }
+    ],
     "require": {}
 }
