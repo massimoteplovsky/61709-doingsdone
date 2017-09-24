@@ -180,8 +180,7 @@ function check_date($str){
     return ($result >= date('Y-m-d H:i:s', time())) ? $result : null;
 }
 
-function filter_tasks($con, $filter_type, $user)
-    {
+function filter_tasks($con, $filter_type, $user){
         switch ($filter_type) {
             case 'today' :
                 return select_data($con, "SELECT id, name, project_id, complete, deadline FROM tasks 

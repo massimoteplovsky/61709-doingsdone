@@ -11,7 +11,7 @@ CREATE TABLE `tasks` (
 `project_id` INT NOT NULL,
 `created` TIMESTAMP NOT NULL,
 `complete` TINYINT(1),
-`deadline` TIMESTAMP NOT NULL,
+`deadline` DATETIME NOT NULL,
 `name` CHAR(255) NOT NULL,
 `file` CHAR(255)
 );

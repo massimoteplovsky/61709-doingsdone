@@ -1,11 +1,13 @@
 {
-    "name": "maxim/61709-doingsdone",
-    "type": "library",
+    "name": "maximalist/doingsdone",
+    "type": "project",
     "authors": [
         {
-            "name": "Maxim",
+            "name": "maximalist",
             "email": "www.maximalist@mail.ru"
         }
     ],
-    "require": {}
+    "require": {
+        "swiftmailer/swiftmailer": "@stable"
+    }
 }
