@@ -1,6 +1,6 @@
 <?php 
 
-$tasks = $templateData["tasks"]; 
+$tasks = $templateData["tasks"] ?? []; 
 
 ?>
 
@@ -15,25 +15,29 @@ $tasks = $templateData["tasks"];
 <div class="tasks-controls">
     <div class="radio-button-group">
         <label class="radio-button">
-            <input class="radio-button__input visually-hidden" onclick="window.location.href='index.php';" type="radio" name="radio" <?php isset($_GET['filter']) ? print("") : print("checked"); ?>>
+            <input class="radio-button__input visually-hidden" onclick="window.location.href='index.php';" 
+                   type="radio" name="radio" <?php isset($_GET['filter']) ? print("") : print("checked"); ?>>
             <span class="radio-button__text">Все задачи</span>
         </label>
 
         <label class="radio-button"> 
             <input class="radio-button__input visually-hidden" onclick="window.location.href='index.php?filter=today';"
-            type="radio" name="radio" <?php isset($_GET['filter']) && $_GET['filter'] == 'today' ? print("checked") : print(""); ?>>
+                   type="radio"   
+                   name="radio" <?php isset($_GET['filter']) && $_GET['filter'] == 'today' ? print("checked") : print(""); ?>>
             <span class="radio-button__text">Повестка дня</span>
         </label>
 
         <label class="radio-button">
             <input class="radio-button__input visually-hidden" onclick="window.location.href='index.php?filter=tomorrow';"
-            type="radio" name="radio" <?php isset($_GET['filter']) && $_GET['filter'] == 'tomorrow' ? print("checked") : print(""); ?>>
+                   type="radio" 
+                   name="radio" <?php isset($_GET['filter']) && $_GET['filter'] == 'tomorrow' ? print("checked") : print(""); ?>>
             <span class="radio-button__text">Завтра</span>
         </label>
 
         <label class="radio-button">
             <input class="radio-button__input visually-hidden" onclick="window.location.href='index.php?filter=overdue';"
-            type="radio" name="radio" <?php isset($_GET['filter']) && $_GET['filter'] == 'overdue' ? print("checked") : print(""); ?>>
+                   type="radio" 
+                   name="radio" <?php isset($_GET['filter']) && $_GET['filter'] == 'overdue' ? print("checked") : print(""); ?>>
             <span class="radio-button__text">Просроченные</span>
         </label>
     </div>

@@ -4,24 +4,6 @@ error_reporting(E_ALL);
 require_once "vendor/autoload.php";
 require_once "functions.php";
 require_once "db/init.php";
-// require_once "notify.php";
-
-
-// устанавливаем часовой пояс в Московское время
-// date_default_timezone_set('Europe/Moscow');
-
-// $days = rand(-3, 3);
-// $task_deadline_ts = strtotime("+" . $days . " day midnight"); // метка времени даты выполнения задачи
-// $current_ts = strtotime('now midnight'); // текущая метка времени
-
-// // запишите сюда дату выполнения задачи в формате дд.мм.гггг
-// $date_deadline = date("d.m.Y", $task_deadline_ts);
-
-// // в эту переменную запишите кол-во дней до даты задачи
-// $days_until_deadline = ($task_deadline_ts - $current_ts) / 86400;
-
-// // показывать или нет выполненные задачи
-// $show_complete_tasks = rand(0, 1);
 
 $task_list = [];
 
@@ -42,7 +24,7 @@ if(isset($_SESSION['user'])){
         $is_exist = false;
         $task_id = $_GET['is_complete'];
 
-        foreach ($task_list as $key => $value) {
+        foreach ($task_list as $key => $value){
             if($value['id'] == $task_id){
                 $is_completed = $value['complete'];
                 $is_exist = true;
@@ -65,7 +47,7 @@ if(isset($_SESSION['user'])){
         $is_exist = false;
         $task_id = $_GET['delete'];
 
-        foreach ($task_list as $key => $value) {
+        foreach ($task_list as $key => $value){
             if($value['id'] == $task_id){
                 $is_exist = true;
             } 
@@ -115,7 +97,6 @@ if(isset($_SESSION['user'])){
 $show_form = false;
 
 //Валидация форм
-  
 $fields = [];
 $errors = [];
 
@@ -149,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         //Валидация загруженного файла
         $fields['link'] = "";
 
-        if (isset($_FILES['preview']) && $_FILES["preview"]["error"] == UPLOAD_ERR_OK) {
+        if(isset($_FILES['preview']) && $_FILES["preview"]["error"] == UPLOAD_ERR_OK) {
 
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             $file_tmp_name = $_FILES['preview']['tmp_name'];
@@ -159,11 +140,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $file_path = __DIR__ . '/uploads/';
             $file_url = $file_path . $file_name;
 
-            if (($file_type !== 'image/gif' && $file_type !== 'image/png' && $file_type !== 'image/jpeg')) {
+            if(($file_type !== 'image/gif' && $file_type !== 'image/png' && $file_type !== 'image/jpeg')) {
                 $errors["file"] = "Загрузите картинку в формате gif, png, jpg.";
             }
 
-            if ($file_size > 102400) {
+            if($file_size > 102400) {
                 $errors["file"] = "Максимальный размер файла: 100мб";
             }
 
@@ -227,8 +208,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } 
 
         if(!empty($_POST["password"]) && !empty($_POST["email"])){
-            if ($user = searchUserByEmail($fields["email"], $users)) {
-               if (password_verify($fields["password"], $user['password'])) {
+            if($user = searchUserByEmail($fields["email"], $users)){
+               if(password_verify($fields["password"], $user['password'])){
                     $_SESSION['user'] = $user;
                 } else {
                    $errors["password"] = "Неверный пароль"; 
@@ -311,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if($query){
                 $task_list = $query;
                 $project_task = $task_list;
-            } else{
+            } else {
                 $task_list = $task_list;
             }
         } else {
@@ -380,10 +361,12 @@ if(isset($_GET['project'])){
 //Показ выполненных задач
 $showCompleted = false;
 
-if (isset($_GET['show_completed'])) {
+if (isset($_GET['show_completed'])){
+
     $showCompleted = sanitizeInput($_GET['show_completed']);
     setcookie('show_completed', $showCompleted, strtotime("+30 days"));
-} else if (isset($_COOKIE['show_completed'])) {
+
+} else if (isset($_COOKIE['show_completed'])){
     $showCompleted = $_COOKIE['show_completed'];
 }
 
@@ -395,6 +378,7 @@ $footer_content = renderTemplate('templates/footer.php');
 
 //Подключение шаблонов
 if(!isset($_SESSION['user'])){
+    
     //Подключение страницы guest.php
     $guest_content = renderTemplate('templates/guest.php', ["header_content" => $header_content, "footer_content" => $footer_content, "title" => "Дела в порядке!", "form_fields" => $fields, "errors" => $errors, "show_form" => $show_form] );
 

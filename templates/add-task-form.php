@@ -2,18 +2,22 @@
 
 <?php 
 
-$errors = $templateData["errors"];
+//Получение данных шаблона: ошибки, значения полей.
+$errors = $templateData["errors"] ?? [];
 $task_name = $templateData["form_fields"]['name'] ?? '';
 $project_id = $templateData["form_fields"]['project'] ?? '';
 $date = $templateData["form_fields"]['date'] ?? '';
 $projects = array_merge([['id' => 0, 'name' => 'Выберите проект']], $templateData['projects']);
+
 ?>
 
 <div class="modal">
   <a href="/index.php" class="modal__close">Закрыть</a>
 
   <h2 class="modal__heading">Добавление задачи</h2>
-
+  <?php if(isset($errors) && $errors) : ?>
+    <p class="error-massage">Пожалуйста, исправьте ошибки в форме</p>
+  <?php endif; ?>
   <form class="form" action="index.php" method="post" enctype="multipart/form-data">
     <div class="form__row">
       <label class="form__label" for="name">Название <sup>*</sup></label>
@@ -23,7 +27,7 @@ $projects = array_merge([['id' => 0, 'name' => 'Выберите проект']]
              id="name"
              value="<?php print($task_name); ?>"
              placeholder="Введите название">
-      <?php isset($errors["name"]) ? print("<span class='form__message'>".$errors['name']."</span>") : print(""); ?>
+      <?php isset($errors["name"]) ? print("<span class='form__message'>" . $errors['name'] . "</span>") : print(""); ?>
     </div>
 
     <div class="form__row">
@@ -32,9 +36,11 @@ $projects = array_merge([['id' => 0, 'name' => 'Выберите проект']]
       <select class="form__input form__input--select <?php isset($errors["project"]) ? print("form__input--error") : print(""); ?>"
               name="project"
               id="project">
+
       <?php foreach ($projects as $key => $value): ?>
         <option value="<?php print($value['id']); ?>" <?php $project_id == $value['id'] ? print("selected") : print(""); ?>><?php print($value['name']); ?></option> 
       <?php endforeach ?>
+
       </select>
       <?php isset($errors["project"]) ? print("<span class='form__message'>".$errors['project']."</span>") : print(""); ?>
     </div>
@@ -61,7 +67,7 @@ $projects = array_merge([['id' => 0, 'name' => 'Выберите проект']]
           <span>Выберите файл</span>
         </label>
       </div>
-      <?php isset($errors["file"]) ? print("<span class='form__message'>".$errors['file']."</span>") : print(""); ?>
+
     </div>
 
     <div class="form__row form__row--controls">

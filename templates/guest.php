@@ -2,7 +2,7 @@
 
 <?php 
 
-$errors = $templateData["errors"];
+$errors = $templateData["errors"] ?? [];
 $email = $templateData["form_fields"]['email'] ?? '';
 $password = $templateData["form_fields"]['password'] ?? '';
 
@@ -50,7 +50,7 @@ $password = $templateData["form_fields"]['password'] ?? '';
 
     <h2 class="modal__heading">Вход на сайт</h2>
     
-    <?php if($errors) : ?>
+    <?php if(isset($errors) && $errors) : ?>
       <p class="error-massage">Пожалуйста, исправьте ошибки в форме</p>
     <?php endif; ?>
 
@@ -62,16 +62,24 @@ $password = $templateData["form_fields"]['password'] ?? '';
       <div class="form__row">
         <label class="form__label" for="email">E-mail <sup>*</sup></label>
 
-        <input class="form__input <?php isset($errors["email"]) ? print("form__input--error") : print(""); ?>" type="text" name="email" id="email" value="<?php print($email);?>" placeholder="Введите e-mail"> 
-        <?php isset($errors["email"]) ? print("<span class='form__message'>".$errors['email']."</span>") : print(""); ?>
+        <input class="form__input <?php isset($errors["email"]) ? print("form__input--error") : print(""); ?>"
+               type="text" name="email" 
+               id="email" value="<?php print($email);?>" 
+               placeholder="Введите e-mail"> 
+        <?php isset($errors["email"]) ? print("<span class='form__message'>" . $errors['email'] . "</span>") : print(""); ?>
         
       </div>
 
       <div class="form__row">
         <label class="form__label" for="password">Пароль <sup>*</sup></label>
 
-        <input class="form__input <?php isset($errors["password"]) ? print("form__input--error") : print(""); ?>" type="password" name="password" id="password" value="<?php print($password);?>" placeholder="Введите пароль">
-        <?php isset($errors["password"]) ? print("<span class='form__message'>".$errors['password']."</span>") : print(""); ?>
+        <input class="form__input <?php isset($errors["password"]) ? print("form__input--error") : print(""); ?>" 
+               type="password" 
+               name="password" 
+               id="password" 
+               value="<?php print($password);?>" 
+               placeholder="Введите пароль">
+        <?php isset($errors["password"]) ? print("<span class='form__message'>" . $errors['password'] . "</span>") : print(""); ?>
       </div>
 
       <div class="form__row">

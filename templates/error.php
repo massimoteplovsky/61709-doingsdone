@@ -7,6 +7,6 @@
 </head>
 <body>
 	<h1>Ошибка</h1>
-	<p>Произошла ошибка: <?php print($templateData['error_connection']); ?></p>
+	<p>Произошла ошибка: <?php isset($templateData['error_connection']) ? print($templateData['error_connection']) : print(""); ?></p>
 </body>
 </html>

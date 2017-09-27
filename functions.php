@@ -51,7 +51,7 @@ function insert_data($link, $table, $data){
     $sql = "INSERT INTO $table (". implode(', ', $col) . ") VALUES (" . placeholders($field) . ")";   
 
     $stmt = db_get_prepare_stmt($link, $sql, $field);
-   
+
     if($stmt){
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
@@ -104,11 +104,11 @@ function searchUserByEmail($email, $users){
 
 //Функция проверки ошибок в формах
 function checkErrors($errors_arr, $field){
-  foreach ($errors_arr as $value) {
-    if ($value == $field) {
-      return true;
-  }
-}
+    foreach ($errors_arr as $value) {
+        if ($value == $field) {
+        return true;
+        }
+    }
 }
 
 function sanitizeInput($data){
@@ -139,16 +139,16 @@ function unset_sessions($array){
 
 function check_date($str){
     $translate = [
-        'сегодня' => strtotime('23:59:59'),
-        'завтра' => time() + 86400,
-        'послезавтра' => time() + 172800,
-        'понедельник' => strtotime('Monday'),
-        'вторник' => strtotime('Tuesday'),
-        'среда' => strtotime('Wednesday'),
-        'четверг' => strtotime('Thursday'),
-        'пятница' => strtotime('Friday'),
-        'суббота' => strtotime('Saturday'),
-        'воскресенье' => strtotime('Sunday')
+    'сегодня' => strtotime('23:59:59'),
+    'завтра' => time() + 86400,
+    'послезавтра' => time() + 172800,
+    'понедельник' => strtotime('Monday'),
+    'вторник' => strtotime('Tuesday'),
+    'среда' => strtotime('Wednesday'),
+    'четверг' => strtotime('Thursday'),
+    'пятница' => strtotime('Friday'),
+    'суббота' => strtotime('Saturday'),
+    'воскресенье' => strtotime('Sunday')
     ];
     $pattern = '(((\d{2})\.(\d{2})\.(\d{4}))|' . implode('|', array_keys($translate)) . ')(\s+в\s+((\d{2}):(\d{2})))?';
     $matches = [];
@@ -181,24 +181,29 @@ function check_date($str){
 }
 
 function filter_tasks($con, $filter_type, $user){
-        switch ($filter_type) {
-            case 'today' :
-                return select_data($con, "SELECT id, name, project_id, complete, deadline FROM tasks 
-                                          WHERE user_id = ? AND DATE_FORMAT(deadline, '%Y-%m-%d') = CURDATE()", [$user['id']]);
-                break;
-            case 'tomorrow':
-                return select_data($con, "SELECT id, name, project_id, complete, DATE_FORMAT(deadline, '%Y-%m-%d %H:%i') as deadline FROM tasks 
-                                          WHERE user_id = ? AND DATE_FORMAT(deadline, '%Y-%m-%d') = DATE_ADD(CURDATE(), INTERVAL + 1 DAY)", [$user['id']]);
-                break;
-            case 'overdue':
-                return select_data($con, "SELECT id, name, project_id, deadline, complete FROM tasks 
-                                          WHERE user_id = ? AND deadline < CURDATE() AND complete != 1", [$user['id']]);
-                break;
-            default: 
-                header("Location: index.php");    
-        }
 
+    switch ($filter_type) {
 
+        case 'today':
+        return select_data($con, "SELECT id, name, project_id, complete, deadline FROM tasks 
+          WHERE user_id = ? AND DATE_FORMAT(deadline, '%Y-%m-%d') = CURDATE()", [$user['id']]);
+        break;
+
+        case 'tomorrow':
+        return select_data($con, "SELECT id, name, project_id, complete, DATE_FORMAT(deadline, '%Y-%m-%d %H:%i') as deadline FROM tasks 
+          WHERE user_id = ? AND DATE_FORMAT(deadline, '%Y-%m-%d') = DATE_ADD(CURDATE(), INTERVAL + 1 DAY)", [$user['id']]);
+        break;
+
+        case 'overdue':
+        return select_data($con, "SELECT id, name, project_id, deadline, complete FROM tasks 
+          WHERE user_id = ? AND deadline < CURDATE() AND complete != 1", [$user['id']]);
+        break;
+
+        default: 
+        header("Location: index.php");    
     }
+
+
+}
 
 ?>

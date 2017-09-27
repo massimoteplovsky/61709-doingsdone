@@ -16,7 +16,7 @@ $query = select_data($con, "SELECT tasks.name, tasks.deadline, user.email, user.
 $mail_info = [];
 
 foreach ($query as $key => $value) {
-	if (array_key_exists($value['email'], $mail_info)) {
+	if (array_key_exists($value['email'], $mail_info)){
 		$mail_info[$value['email']]['task'] .= "- " . $value['name'] . " на " . $value['deadline'] . ";";
 	} else {
 		$mail_info[$value['email']]['task'] = "- " . $value['name'] . " на " . $value['deadline'] . ";\n";
@@ -26,19 +26,17 @@ foreach ($query as $key => $value) {
 }
 
 //Отправка почты
-foreach ($mail_info as $key => $value) {
+foreach ($mail_info as $key => $value){
 	sendMail($key, message($value['name'], $value['task']));
 }
 
 //Получение текста сообщения
-function message($name, $task)
-{
+function message($name, $task){
 	return "Уважаемый пользователь, $name. У Вас запланирована задача:\n$task\n";
 }
 
 
-function sendMail($email, $message)
-{
+function sendMail($email, $message){
 
 	$transport = (new Swift_SmtpTransport('smtp.mail.ru', 465, 'ssl'))
 	->setUsername('doingsdone@mail.ru')

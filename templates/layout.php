@@ -1,6 +1,7 @@
 <?php 
-    $projects = array_merge([['id' => 0, 'name' => 'Все']], $templateData['projects']);
-    $tasks = $templateData['tasks'];
+    $projects_list = $templateData['projects'] ?? [];
+    $projects = array_merge([['id' => 0, 'name' => 'Все']], $projects_list);
+    $tasks = $templateData['tasks'] ?? [];
 ?>
 
 <!DOCTYPE html>

@@ -1,8 +1,8 @@
 
 <!--модальное окно добавления проекта-->
-
 <?php 
 
+//Получение данных шаблона: ошибки, значения полей.
 $errors = $templateData["errors"];
 $project_name = $templateData["form_fields"]['name'] ?? '';
 
