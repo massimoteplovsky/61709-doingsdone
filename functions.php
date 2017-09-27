@@ -111,6 +111,7 @@ function checkErrors($errors_arr, $field){
     }
 }
 
+//Проверка введенных данных
 function sanitizeInput($data){
     $data = trim($data);
     $data = stripslashes($data);
@@ -118,6 +119,7 @@ function sanitizeInput($data){
     return $data;
 }
 
+//Счетчик задач
 function task_counter($tasks, $project_id){
 
     $counter = 0;
@@ -131,12 +133,14 @@ function task_counter($tasks, $project_id){
     return $counter;
 }
 
+//Удаление сессий
 function unset_sessions($array){
     foreach ($array as $value) {
         unset($_SESSION[$value]);
     }
 }
 
+//Валидация даты
 function check_date($str){
     $translate = [
     'сегодня' => strtotime('23:59:59'),
@@ -180,6 +184,7 @@ function check_date($str){
     return ($result >= date('Y-m-d H:i:s', time())) ? $result : null;
 }
 
+//Фильтрация задач
 function filter_tasks($con, $filter_type, $user){
 
     switch ($filter_type) {
